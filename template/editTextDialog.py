@@ -1,4 +1,9 @@
+import logging
+
 from Qt import QtWidgets, QtGui
+
+
+logger = logging.getLogger(__name__)
 
 
 class EditTextDialog(QtWidgets.QDialog):
@@ -40,7 +45,7 @@ class EditTextDialog(QtWidgets.QDialog):
         if self.ui_text_edit.toPlainText():
             self.accept()
         else:
-            print('value cannot be empty')
+            logger.error('value cannot be empty')
 
     def get_text(self):
         """
