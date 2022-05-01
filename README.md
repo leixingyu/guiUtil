@@ -13,3 +13,16 @@ python qt bindings (Only needed if you need UI support functionalities)
     ```
     pip install Qt.py
     ```
+  
+- [PyQtChart](https://pypi.org/project/PyQtChart/): an add-on module for Qt
+python that supports drawing Charts
+  ```
+  pip install PyQtChart
+  ```
+
+- [PipelineUtil](https://github.com/leixingyu/pipelineUtil): a Python utility
+library for general pipeline purpose
+    ```
+    git clone https://github.com/leixingyu/pipelineUtil.git
+    ```
+
