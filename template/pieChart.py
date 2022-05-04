@@ -18,14 +18,11 @@ class SimpleChart(QtChart.QChart):
     A bare minimum implementation of pie chart in Qt
     """
 
-    def __init__(self, datas, parent=None):
+    def __init__(self, parent=None):
         """
         Initialization with layout and population
-
-        :param datas: pieChart.Data. data to be fed into the chart
         """
         super(SimpleChart, self).__init__(parent)
-        self._datas = datas
         offset = 40
 
         self.legend().setAlignment(QtCore.Qt.AlignRight)
@@ -34,15 +31,16 @@ class SimpleChart(QtChart.QChart):
         self.series = QtChart.QPieSeries()
         self.series.setPieStartAngle(offset)
         self.series.setPieEndAngle(offset+360)
-        self.set_series()
         self.addSeries(self.series)
 
-    def set_series(self):
+    def set_series(self, datas):
         """
         Set design of the chart series
+
+        :param datas: pieChart.Data. data to be fed into the chart
         """
         slices = list()
-        for data in self._datas:
+        for data in datas:
             slice_ = QtChart.QPieSlice(data.name, data.value)
             slice_.setColor(QtGui.QColor(data.color))
             slice_.setLabelBrush(QtGui.QColor(data.color))
@@ -68,14 +66,11 @@ class SmartChart(QtChart.QChart):
     double looped pie chart layout design and hover animation.
     """
 
-    def __init__(self, datas, parent=None):
+    def __init__(self, parent=None):
         """
         Initialization with layout and population
-
-        :param datas: pieChart.Data. data to be fed into the chart
         """
         super(SmartChart, self).__init__(parent)
-        self._datas = datas
         offset = 140
 
         self.setMargins(QtCore.QMargins(0, 0, 0, 0))
@@ -92,18 +87,17 @@ class SmartChart(QtChart.QChart):
         self.inner.setPieStartAngle(offset)
         self.inner.setPieEndAngle(offset+360)
 
-        self.set_outer_series()
-        self.set_inner_series()
-
         self.addSeries(self.outer)
         self.addSeries(self.inner)
 
-    def set_outer_series(self):
+    def set_series(self, datas):
         """
         Set design of the outer looped chart series
+
+        :param datas: pieChart.Data. data to be fed into the chart
         """
         slices = list()
-        for data in self._datas:
+        for data in datas:
             slice_ = QtChart.QPieSlice(data.name, data.value)
             slice_.setColor(QtGui.QColor(data.color))
             slice_.setLabelBrush(QtGui.QColor(data.color))
@@ -129,11 +123,8 @@ class SmartChart(QtChart.QChart):
             if slice_.percentage() > 0.03:
                 slice_.setLabelVisible()
 
-    def set_inner_series(self):
-        """
-        Set design of the inner looped chart series
-        """
-        for data in self._datas:
+        # inner series
+        for data in datas:
             slice_ = self.inner.append(data.name, data.value)
             slice_.setColor(self.get_secondary_color(data.color))
             slice_.setBorderColor(self.get_secondary_color(data.color))
@@ -196,7 +187,8 @@ if __name__ == '__main__':
         def __init__(self, datas, parent=None):
             super(Example, self).__init__(parent)
 
-            chart = SimpleChart(datas)
+            chart = SmartChart()
+            chart.set_series(datas)
             chart.resize(700, 400)
             chart_view = SimpleChartView(chart)
 
