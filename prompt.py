@@ -1,6 +1,12 @@
 from Qt import QtWidgets, QtGui, QtCore
 
 
+QUESTION = 0
+INFO = 1
+WARNING = 2
+ERROR = 3
+
+
 def pick_color(qcolor=None):
     """
     Prompt user to pick a color
@@ -14,70 +20,75 @@ def pick_color(qcolor=None):
     return QtWidgets.QColorDialog.getColor(qcolor)
 
 
-def set_export_path(title='Export', default_path='C:/', file_type='*'):
+def get_path_export(title='Export', default_path='C:/', typ='*'):
     """
     Get directory/folder full path for export
 
     :param title: str. export window title, defaults to 'Export'
     :param default_path: str. default path opened in the window
-    :param file_type: str. file filter pattern
+    :param typ: str. file filter pattern
     :return: str. export folder full path
     """
     path = QtWidgets.QFileDialog.getSaveFileName(
         None,
         title,
         default_path,
-        filter=file_type)[0]
+        filter=typ)[0]
     return path
 
 
-def set_import_path(title='Import', default_path='C:/', file_type='*'):
+def get_path_import(title='Import', default_path='C:/', typ='*'):
     """
     Get file full path for export
 
     :param title: str. import window title, defaults to 'Import'
     :param default_path: str. default path opened in the window
-    :param file_type: str. file filter pattern
+    :param typ: str. file filter pattern
     :return: str. import file full path
     """
     path = QtWidgets.QFileDialog.getOpenFileName(
         None,
         title,
         default_path,
-        filter=file_type)[0]
+        filter=typ)[0]
     return path
 
 
-def message_log(message, ltype='error', title=''):
+def message(msg, typ=ERROR, title=''):
     """
     Activate a message box prompt with one confirm button
 
-    :param message: str. custom message
-    :param ltype: str ('error' or 'info'). type of the log
+    :param msg: str. custom message
+    :param typ: str ('error' or 'info'). type of the log
     :param title: str. message box title
     :return: widget instance
     """
-    icon = None
-    if ltype == 'error':
+    if typ == ERROR:
         icon = QtWidgets.QMessageBox.Critical
-    elif ltype == 'info':
+    elif typ == INFO:
         icon = QtWidgets.QMessageBox.Information
+    elif typ == WARNING:
+        icon = QtWidgets.QMessageBox.Warning
+    elif typ == QUESTION:
+        icon = QtWidgets.QMessageBox.Question
+    else:
+        icon = QtWidgets.QMessageBox.NoIcon
 
     msg_box = QtWidgets.QMessageBox()
 
     msg_box.setIcon(icon)
     msg_box.setWindowTitle(title)
-    msg_box.setText(message)
+    msg_box.setText(msg)
 
     msg_box.setStandardButtons(QtWidgets.QMessageBox.Ok)
     return msg_box.exec_()
 
 
-def message_yesno(message, title=''):
+def yes_no(msg, title=''):
     """
     Raise a message box prompt for user to choose
 
-    :param message: str. custom message
+    :param msg: str. custom message
     :param title: str. message box title
     :return: QtWidgets.QMessageBox.Yes or No. user's choice
     """
@@ -85,10 +96,11 @@ def message_yesno(message, title=''):
 
     msg_box.setIcon(QtWidgets.QMessageBox.Question)
     msg_box.setWindowTitle(title)
-    msg_box.setText(message)
+    msg_box.setText(msg)
 
     msg_box.setStandardButtons(
         QtWidgets.QMessageBox.Yes |
-        QtWidgets.QMessageBox.No)
+        QtWidgets.QMessageBox.No
+    )
     user_choice = msg_box.exec_()
     return user_choice
