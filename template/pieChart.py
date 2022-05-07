@@ -28,36 +28,42 @@ class SimpleChart(QtChart.QChart):
         self.legend().setAlignment(QtCore.Qt.AlignRight)
         self.legend().setMarkerShape(QtChart.QLegend.MarkerShapeCircle)
 
-        self.series = QtChart.QPieSeries()
-        self.series.setPieStartAngle(offset)
-        self.series.setPieEndAngle(offset+360)
-        self.addSeries(self.series)
+        self.__series = QtChart.QPieSeries()
+        self.__series.setPieStartAngle(offset)
+        self.__series.setPieEndAngle(offset+360)
+        self.addSeries(self.__series)
 
-    def set_series(self, datas):
+    def add_slice(self, name, value, color):
         """
-        Set design of the chart series
+        Add one slice to the pie chart
 
-        :param datas: pieChart.Data. data to be fed into the chart
+        :param name: str. name of the slice
+        :param value: value. value of the slice (contribute to how much the
+                      slice would span in angle)
+        :param color: str. hex code for slice color
         """
-        slices = list()
-        for data in datas:
-            slice_ = QtChart.QPieSlice(data.name, data.value)
-            slice_.setColor(QtGui.QColor(data.color))
-            slice_.setLabelBrush(QtGui.QColor(data.color))
-            slice_.setLabelArmLengthFactor(0.3)
+        slice_ = QtChart.QPieSlice(name, value)
+        slice_.setColor(QtGui.QColor(color))
+        slice_.setLabelBrush(QtGui.QColor(color))
+        slice_.percentageChanged.connect(lambda: self.__update_label(slice_, name))
 
-            slices.append(slice_)
-            self.series.append(slice_)
+        self.__series.append(slice_)
 
-        # label styling
-        for slice_ in slices:
-            label = "<p align='center' style='color:black'>{} {}%</p>".format(
-                slice_.label(),
-                round(slice_.percentage()*100, 2))
-            slice_.setLabel(label)
+    @staticmethod
+    def __update_label(slice_, title):
+        """
+        Update the label of a slice
 
-            if slice_.percentage() > 0.03:
-                slice_.setLabelVisible()
+        :param slice_: QPieSlice. the slice the label is applied
+        :param title: str. title of the label
+        """
+        label = "<p align='center' style='color:black'>{} {}%</p>".format(
+            title,
+            round(slice_.percentage() * 100, 2))
+        slice_.setLabel(label)
+        slice_.setLabelArmLengthFactor(0.3)
+        if slice_.percentage() > 0.03:
+            slice_.setLabelVisible()
 
 
 class SmartChart(QtChart.QChart):
@@ -77,59 +83,69 @@ class SmartChart(QtChart.QChart):
         self.legend().hide()
         self.setAnimationOptions(QtChart.QChart.SeriesAnimations)
 
-        self.outer = QtChart.QPieSeries()
-        self.inner = QtChart.QPieSeries()
-        self.outer.setHoleSize(0.35)
-        self.outer.setPieStartAngle(offset)
-        self.outer.setPieEndAngle(offset+360)
-        self.inner.setPieSize(0.35)
-        self.inner.setHoleSize(0.3)
-        self.inner.setPieStartAngle(offset)
-        self.inner.setPieEndAngle(offset+360)
+        self.__outer = QtChart.QPieSeries()
+        self.__inner = QtChart.QPieSeries()
+        self.__outer.setHoleSize(0.35)
+        self.__outer.setPieStartAngle(offset)
+        self.__outer.setPieEndAngle(offset+360)
+        self.__inner.setPieSize(0.35)
+        self.__inner.setHoleSize(0.3)
+        self.__inner.setPieStartAngle(offset)
+        self.__inner.setPieEndAngle(offset+360)
 
-        self.addSeries(self.outer)
-        self.addSeries(self.inner)
+        self.addSeries(self.__outer)
+        self.addSeries(self.__inner)
 
-    def set_series(self, datas):
+    def add_slice(self, name, value, color):
         """
-        Set design of the outer looped chart series
+        Add one slice to the pie chart
 
-        :param datas: pieChart.Data. data to be fed into the chart
+        :param name: str. name of the slice
+        :param value: value. value of the slice (contribute to how much the
+                      slice would span in angle)
+        :param color: str. hex code for slice color
         """
-        slices = list()
-        for data in datas:
-            slice_ = QtChart.QPieSlice(data.name, data.value)
-            slice_.setColor(QtGui.QColor(data.color))
-            slice_.setLabelBrush(QtGui.QColor(data.color))
+        # outer
+        outer_slice = QtChart.QPieSlice(name, value)
+        outer_slice.setColor(QtGui.QColor(color))
+        outer_slice.setLabelBrush(QtGui.QColor(color))
 
-            slices.append(slice_)
-            self.outer.append(slice_)
-            slice_.hovered.connect(partial(self.explode, slice_))
+        outer_slice.hovered.connect(lambda is_hovered: self.__explode(outer_slice, is_hovered))
+        outer_slice.percentageChanged.connect(lambda: self.__update_label(outer_slice, name))
 
-        # label styling
-        for slice_ in slices:
-            color = 'black'
-            if slice_.percentage() > 0.1:
-                slice_.setLabelPosition(QtChart.QPieSlice.LabelInsideHorizontal)
-                color = 'white'
+        self.__outer.append(outer_slice)
 
-            label = "<p align='center' style='color:{}'>{}<br>{}%</p>".format(
-                color,
-                slice_.label(),
-                round(slice_.percentage()*100, 2)
-                )
-            slice_.setLabel(label)
+        # inner
+        inner_color = self.__get_secondary_color(color)
+        inner_slice = QtChart.QPieSlice(name, value)
+        self.__inner.append(inner_slice)
+        inner_slice.setColor(inner_color)
+        inner_slice.setBorderColor(inner_color)
 
-            if slice_.percentage() > 0.03:
-                slice_.setLabelVisible()
+    @staticmethod
+    def __update_label(slice_, title):
+        """
+        Update the label of a slice
 
-        # inner series
-        for data in datas:
-            slice_ = self.inner.append(data.name, data.value)
-            slice_.setColor(self.get_secondary_color(data.color))
-            slice_.setBorderColor(self.get_secondary_color(data.color))
+        :param slice_: QPieSlice. the slice the label is applied
+        :param title: str. title of the label
+        """
+        text_color = 'black'
+        if slice_.percentage() > 0.1:
+            slice_.setLabelPosition(QtChart.QPieSlice.LabelInsideHorizontal)
+            text_color = 'white'
 
-    def explode(self, slice_, is_hovered):
+        label = "<p align='center' style='color:{}'>{}<br>{}%</p>".format(
+            text_color,
+            title,
+            round(slice_.percentage()*100, 2)
+            )
+        slice_.setLabel(label)
+
+        if slice_.percentage() > 0.03:
+            slice_.setLabelVisible()
+
+    def __explode(self, slice_, is_hovered):
         """
         Explode function slot for hovering effect
 
@@ -138,12 +154,12 @@ class SmartChart(QtChart.QChart):
         """
         if is_hovered:
             start = slice_.startAngle()
-            end = slice_.startAngle()+slice_.angleSpan()
-            self.inner.setPieStartAngle(end)
-            self.inner.setPieEndAngle(start+360)
+            end = slice_.startAngle() + slice_.angleSpan()
+            self.__inner.setPieStartAngle(end)
+            self.__inner.setPieEndAngle(start+360)
         else:
-            self.inner.setPieStartAngle(0)
-            self.inner.setPieEndAngle(360)
+            self.__inner.setPieStartAngle(0)
+            self.__inner.setPieEndAngle(360)
 
         slice_.setLabelVisible(is_hovered)
         slice_.setExplodeDistanceFactor(0.1)
@@ -153,7 +169,7 @@ class SmartChart(QtChart.QChart):
             slice_.setLabelVisible()
 
     @staticmethod
-    def get_secondary_color(hexcode):
+    def __get_secondary_color(hexcode):
         """
         Get secondary color which is blended 50% with white
         to appear lighter
@@ -188,9 +204,11 @@ if __name__ == '__main__':
             super(Example, self).__init__(parent)
 
             chart = SmartChart()
-            chart.set_series(datas)
             chart.resize(700, 400)
             chart_view = SimpleChartView(chart)
+
+            for data in datas:
+                chart.add_slice(data.name, data.value, data.color)
 
             self.setCentralWidget(chart_view)
 
