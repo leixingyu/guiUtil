@@ -5,7 +5,6 @@ Template for drawing Pie Charts in Qt Application
 
 import sys
 from collections import namedtuple
-from functools import partial
 
 from PyQt5 import QtCore, QtWidgets, QtGui, QtChart
 
@@ -23,7 +22,7 @@ class SimpleChart(QtChart.QChart):
         Initialization with layout and population
         """
         super(SimpleChart, self).__init__(parent)
-        offset = 40
+        offset = 140
 
         self.legend().setAlignment(QtCore.Qt.AlignRight)
         self.legend().setMarkerShape(QtChart.QLegend.MarkerShapeCircle)
@@ -32,6 +31,13 @@ class SimpleChart(QtChart.QChart):
         self.__series.setPieStartAngle(offset)
         self.__series.setPieEndAngle(offset+360)
         self.addSeries(self.__series)
+
+    def clear(self):
+        """
+        Clear all slices in the pie chart
+        """
+        for slice_ in self.__series.slices():
+            self.__series.take(slice_)
 
     def add_slice(self, name, value, color):
         """
@@ -95,6 +101,16 @@ class SmartChart(QtChart.QChart):
 
         self.addSeries(self.__outer)
         self.addSeries(self.__inner)
+
+    def clear(self):
+        """
+        Clear all slices in the pie chart
+        """
+        for slice_ in self.__outer.slices():
+            self.__outer.take(slice_)
+
+        for slice_ in self.__inner.slices():
+            self.__inner.take(slice_)
 
     def add_slice(self, name, value, color):
         """
