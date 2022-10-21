@@ -37,9 +37,9 @@ def get_path_export(title='Export', default_path='C:/', typ='*'):
     return path
 
 
-def get_path_import(title='Import', default_path='C:/', typ='*'):
+def get_file_import(title='Import', default_path='C:/', typ='*'):
     """
-    Get file full path for export
+    Get file full path for import
 
     :param title: str. import window title, defaults to 'Import'
     :param default_path: str. default path opened in the window
@@ -51,6 +51,21 @@ def get_path_import(title='Import', default_path='C:/', typ='*'):
         title,
         default_path,
         filter=typ)[0]
+    return path
+
+
+def get_folder_import(title='Import', default_path='C:/'):
+    """
+    Get folder full path for import
+
+    :param title: str. import window title, defaults to 'Import'
+    :param default_path: str. default path opened in the window
+    :return: str. import folder full path
+    """
+    path = QtWidgets.QFileDialog.getExistingDirectory(
+        None,
+        title,
+        default_path)
     return path
 
 
