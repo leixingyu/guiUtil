@@ -7,14 +7,14 @@ import sys
 from Qt import QtWidgets, QtCore, QtGui
 
 
-class SmartTable(QtWidgets.QTableWidget):
+class SmartTableWidget(QtWidgets.QTableWidget):
 
     def __init__(self, parent=None):
         """
         Initialization
         Vertical header (no. column) is removed for visual purpose
         """
-        super(SmartTable, self).__init__(parent)
+        super(SmartTableWidget, self).__init__(parent)
         self.min_width = 0
         self.verticalHeader().setVisible(False)
 
@@ -22,7 +22,7 @@ class SmartTable(QtWidgets.QTableWidget):
         """
         Override. determine the minimum table width based on header
         """
-        super(SmartTable, self).setHorizontalHeaderLabels(*args, **kwargs)
+        super(SmartTableWidget, self).setHorizontalHeaderLabels(*args, **kwargs)
 
         header = self.horizontalHeader()
         for i in range(self.columnCount()):
@@ -43,7 +43,7 @@ class SmartTable(QtWidgets.QTableWidget):
         exceeds the minimum width; if so, we add scroll bar and retain each
         header to the minimum width, if not, we stretch each header
         """
-        super(SmartTable, self).resizeEvent(event)
+        super(SmartTableWidget, self).resizeEvent(event)
 
         if not self.columnCount():
             return
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     """
     app = QtWidgets.QApplication(sys.argv)
 
-    table = SmartTable()
+    table = SmartTableWidget()
     table.setColumnCount(5)
     table.setHorizontalHeaderLabels(
         ['apple', 'orange', 'banana', 'strawberry', 'pineapple'])
