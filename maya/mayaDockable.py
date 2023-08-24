@@ -7,6 +7,7 @@ from shiboken2 import wrapInstance
 from builtins import int
 
 import maya.cmds as cmds
+import maya.mel as mel
 from maya.api import OpenMayaUI
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
@@ -25,7 +26,7 @@ class DockableUI(MayaQWidgetDockableMixin, QtWidgets.QMainWindow):
         _loadUi(UI_PATH, self)
 
 
-def deleteInstances():
+def delete_instances():
     for ctrlName in [WIDGET_OBJECT_NAME, WORKSPACE_CTRL_NAME]:
         ctrl = OpenMayaUI.MQtUtil.findControl(ctrlName)
         if ctrl:
@@ -37,8 +38,33 @@ def deleteInstances():
         pass
 
 
+def get_dockables():
+    """
+    Get all the UI element names in Maya that is dockable
+
+    :return: dict. dockable UI element name mappings
+    """
+    dockables = {
+        "CHANNEL_BOX": mel.eval('getUIComponentDockControl("Channel Box / Layer Editor", false)'),
+        "ATTRIBUTE_EDITOR": mel.eval('getUIComponentDockControl("Attribute Editor", false)'),
+        "TOOL_SETTINGS": mel.eval('getUIComponentDockControl("Tool Settings", false)'),
+        "OUTLINER": mel.eval('getUIComponentDockControl("Outliner", false)'),
+
+        "SHELF": mel.eval('getUIComponentToolBar("Shelf", false)'),
+        "TIME_SLIDER": mel.eval('getUIComponentToolBar("Time Slider", false)'),
+        "RANGE_SLIDER": mel.eval('getUIComponentToolBar("Range Slider", false)'),
+        "COMMAND_LINE": mel.eval('getUIComponentToolBar("Command Line", false)'),
+        "HELP_LINE": mel.eval('getUIComponentToolBar("Help Line", false)'),
+        "TOOL_BOX": mel.eval('getUIComponentToolBar("Tool Box", false)'),
+
+        "UV_EDITOR": "polyTexturePlacementPanel1Window",
+        "UV_TOOLKIT": "UVToolkitDockControl"
+    }
+    return dockables
+
+
 def show():
-    deleteInstances()
+    delete_instances()
     global _DOCKWIDGET
     _DOCKWIDGET = DockableUI()
     _DOCKWIDGET.setObjectName(WIDGET_OBJECT_NAME)

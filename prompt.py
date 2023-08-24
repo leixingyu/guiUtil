@@ -20,6 +20,17 @@ def pick_color(qcolor=None):
     return QtWidgets.QColorDialog.getColor(qcolor)
 
 
+def display_splash_screen(fpath):
+    """
+    Display a splash screen
+
+    :param fpath: str. path to the splash image
+    """
+    pixmap = QtGui.QPixmap(fpath)
+    splash = QtWidgets.QSplashScreen(pixmap, QtCore.Qt.WindowStaysOnTopHint)
+    splash.show()
+
+
 def get_path_export(title='Export', default_path='C:/', typ='*'):
     """
     Get directory/folder full path for export
