@@ -83,7 +83,7 @@ class SmartChart(QtChart.QChart):
         Initialization with layout and population
         """
         super(SmartChart, self).__init__(parent)
-        offset = 140
+        self.offset = 140
 
         self.setMargins(QtCore.QMargins(0, 0, 0, 0))
         self.legend().hide()
@@ -92,12 +92,12 @@ class SmartChart(QtChart.QChart):
         self.__outer = QtChart.QPieSeries()
         self.__inner = QtChart.QPieSeries()
         self.__outer.setHoleSize(0.35)
-        self.__outer.setPieStartAngle(offset)
-        self.__outer.setPieEndAngle(offset+360)
+        self.__outer.setPieStartAngle(self.offset)
+        self.__outer.setPieEndAngle(self.offset+360)
         self.__inner.setPieSize(0.35)
         self.__inner.setHoleSize(0.3)
-        self.__inner.setPieStartAngle(offset)
-        self.__inner.setPieEndAngle(offset+360)
+        self.__inner.setPieStartAngle(self.offset)
+        self.__inner.setPieEndAngle(self.offset+360)
 
         self.addSeries(self.__outer)
         self.addSeries(self.__inner)
@@ -174,8 +174,8 @@ class SmartChart(QtChart.QChart):
             self.__inner.setPieStartAngle(end)
             self.__inner.setPieEndAngle(start+360)
         else:
-            self.__inner.setPieStartAngle(0)
-            self.__inner.setPieEndAngle(360)
+            self.__inner.setPieStartAngle(self.offset)
+            self.__inner.setPieEndAngle(self.offset+360)
 
         slice_.setLabelVisible(is_hovered)
         slice_.setExplodeDistanceFactor(0.1)
